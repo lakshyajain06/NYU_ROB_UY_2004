@@ -191,19 +191,19 @@ class ForwardKinematics(Node):
         """Timer callback for publishing end-effector marker and position."""
         if self.joint_positions is not None:
             # Joint angles
-            theta1_f = self.joint_positions[0] + 0.92
-            theta2_f = self.joint_positions[1] - 0.01
-            theta3_f = self.joint_positions[2] - 1.85
+            theta1_f = self.joint_positions[0] + 0.89
+            theta2_f = self.joint_positions[1] - 0.11
+            theta3_f = self.joint_positions[2] - 1.73
             theta1_b = self.joint_positions[3] + 0.92
-            theta2_b = self.joint_positions[4] - 0.01
-            theta3_b = self.joint_positions[5] - 1.85
+            theta2_b = self.joint_positions[4] #- 0.00
+            theta3_b = self.joint_positions[5] - 1.73
             end_effector_position_f = self.forward_kinematics_f(theta1_f, theta2_f, theta3_f)
             end_effector_position_b = self.forward_kinematics_b(theta1_b, theta2_b, theta3_b)
             
 
             distance_btwn_legs = np.linalg.norm(end_effector_position_f - end_effector_position_b)
 
-            if (distance_btwn_legs <= 0.06):
+            if (distance_btwn_legs <= 0.055):
                 playing = sound.play()
 
             time_stamp = time.time() - self.start_time
