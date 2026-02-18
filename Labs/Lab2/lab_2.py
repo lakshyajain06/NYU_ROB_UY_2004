@@ -112,7 +112,11 @@ class ForwardKinematics(Node):
 
     # FK for forward left leg
     def forward_kinematics_f(self, theta1, theta2, theta3):
-
+        
+        # theta1 = theta1 + 0.92
+        # theta2 = theta2 - 0.01
+        # theta3 = theta3 - 1.85
+        print(theta1,theta2,theta3)
         # T_0_1 (base_link to leg_front_l_1)
         T_0_1 = self.translation(0.07500, 0.0445, 0) @ self.rotation_x(-1.57080)
 
@@ -147,9 +151,38 @@ class ForwardKinematics(Node):
 
     # FK for back left leg
     def forward_kinematics_b(self, theta1, theta2, theta3):
+        
+        # theta1 = theta1 + 0.92
+        # theta2 = theta2 - 0.01
+        # theta3 = theta3 - 1.85
+        print(theta1,theta2,theta3)
+        # T_0_1 (base_link to leg_front_l_1)
+        T_0_1 = self.translation(-0.07500, 0.0445, 0) @ self.rotation_x(-1.57080)
 
-        ## TODO: Implement the FK for the back left leg, similar to forward_kinematics_f
-        end_effector_position = np.array([0,0,0])
+        T_m1 = self.rotation_z(theta1)
+
+        # T_1_2 (leg_front_l_1 to leg_front_l_2)
+        ## TODO: Implement the transformation matrix from leg_front_l_1 to leg_front_l_2
+        T_1_2 = self.translation(0, 0, 0.05) @ self.rotation_z(0.7854) @ self.rotation_x(-1.57080) 
+
+
+        T_m2 = self.rotation_z(theta2)
+
+        # T_2_3 (leg_front_l_2 to leg_front_l_3)
+        ## TODO: Implement the transformation matrix from leg_front_l_2 to leg_front_l_3
+        T_2_3 = self.translation(0.05, 0, 0.065) @ self.rotation_x(1.57080)  @ self.rotation_z(-0.7854)
+
+        T_m3 = self.rotation_z(theta3)
+
+        # T_3_ee (leg_front_l_3 to end-effector)
+        ## TODO: Implement the transformation matrix from leg_front_l_3 to end effector
+        T_3_ee = self.translation(0, 0.085, 0.02) 
+
+        # TODO: Compute the final transformation. T_0_ee is the multiplication of the previous transformation matrices
+        T_0_ee = T_0_1 @ T_m1 @ T_1_2 @ T_m2 @ T_2_3 @ T_m3 @ T_3_ee
+
+        # TODO: Extract the end-effector position. The end effector position is a 3x1 vector (not in homogenous coordinates)
+        end_effector_position = T_0_ee[0:3, 3]
 
         return end_effector_position
 
@@ -158,15 +191,21 @@ class ForwardKinematics(Node):
         """Timer callback for publishing end-effector marker and position."""
         if self.joint_positions is not None:
             # Joint angles
-            theta1_f = self.joint_positions[0] + 0
-            theta2_f = self.joint_positions[1] + 0
-            theta3_f = self.joint_positions[2] + 0
-            theta1_b = self.joint_positions[3] + 0
-            theta2_b = self.joint_positions[4] + 0
-            theta3_b = self.joint_positions[5] + 0
+            theta1_f = self.joint_positions[0] + 0.92
+            theta2_f = self.joint_positions[1] - 0.01
+            theta3_f = self.joint_positions[2] - 1.85
+            theta1_b = self.joint_positions[3] + 0.92
+            theta2_b = self.joint_positions[4] - 0.01
+            theta3_b = self.joint_positions[5] - 1.85
             end_effector_position_f = self.forward_kinematics_f(theta1_f, theta2_f, theta3_f)
             end_effector_position_b = self.forward_kinematics_b(theta1_b, theta2_b, theta3_b)
             
+
+            distance_btwn_legs = np.linalg.norm(end_effector_position_f - end_effector_position_b)
+
+            if (distance_btwn_legs <= 0.06):
+                playing = sound.play()
+
             time_stamp = time.time() - self.start_time
             self.log_data(time_stamp, theta1_f, theta2_f, theta3_f, theta1_b, theta2_b, theta3_b, end_effector_position_f, end_effector_position_b)
             
@@ -193,6 +232,7 @@ class ForwardKinematics(Node):
             self.get_logger().info(
                 f"End-Effector Position: x={end_effector_position_f[0]:.2f}, y={end_effector_position_f[1]:.2f}, z={end_effector_position_f[2]:.2f}"
             )
+            
 
 
 def main(args=None):

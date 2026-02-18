@@ -32,16 +32,24 @@ def plot_leg_path(data_dictionary):
     z_ee_f =end_effector_position_f[:,2]
 
 
-    plt.plot(x_ee_f,z_ee_f)
-    plt.title('End Effector trajectory')
-    plt.xlabel('EE X(m)')
-    plt.ylabel('EE Z(m)')
-    plt.show()
+    # plt.plot(x_ee_f,z_ee_f)
+    # plt.title('End Effector trajectory')
+    # plt.xlabel('EE X(m)')
+    # plt.ylabel('EE Z(m)')
+    # plt.show()
+    
+#     plt.plot(x, y1, label='Sine Wave')
+# plt.plot(x, y2, label='Cosine Wave')
 
-    plt.plot(time_stamp_list,z_ee_f )
-    plt.title('End Effector Z vs Time')
+# # 2. Add plt.legend() to display it
+# plt.legend(loc='best'
+
+    plt.plot(time_stamp_list,z_ee_f, label="Z")
+    plt.plot(time_stamp_list,y_ee_f, label="Y")
+    plt.plot(time_stamp_list,x_ee_f, label="X")
+    plt.title('End Effector Coords vs Time')
     plt.xlabel('Time(s)')
-    plt.ylabel('EE Z (m)')
+    plt.ylabel('Distance (m)')
     plt.show()
 
 
