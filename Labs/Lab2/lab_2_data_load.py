@@ -48,13 +48,15 @@ def plot_leg_path(data_dictionary):
     plt.plot(time_stamp_list,y_ee_f, label="Y")
     plt.plot(time_stamp_list,x_ee_f, label="X")
     plt.title('End Effector Coords vs Time')
+    plt.legend(loc='best')
     plt.xlabel('Time(s)')
     plt.ylabel('Distance (m)')
+    plt.savefig('my_plot.png')
     plt.show()
 
 
 
 ##### MAIN ######
-data_loader = DataLoader('./lab_2_datab.pkl')
+data_loader = DataLoader('./lab_2_x_movement.pkl')
 data_dictionary = data_loader.load()
 plot_leg_path(data_dictionary)
