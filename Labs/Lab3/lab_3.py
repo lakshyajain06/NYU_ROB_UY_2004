@@ -65,45 +65,57 @@ class InverseKinematics(Node):
         # TODO: Implement the trotting gait
         ################################################################################################
             
-        touch_down_position = np.array([0,0,0])
-        stand_position_1 = np.array([0,0,0])
-        stand_position_2 = np.array([0,0,0])
-        stand_position_3 = np.array([0,0,0])
-        liftoff_position = np.array([0,0,0])
-        mid_swing_position = np.array([0,0,0])
+        touch_down_position = np.array([0.05,0,-0.14])
+        stand_position_1 = np.array([0.025,0,-0.14])
+        stand_position_2 = np.array([0,0,-0.14])
+        stand_position_3 = np.array([-0.025,0,-0.14])
+        liftoff_position = np.array([-0.05,0,-0.14])
+        mid_swing_position = np.array([0,0,-0.05])
         
         ## trotting
         # TODO: Implement each leg’s trajectory in the trotting gait.
-        rf_ee_offset = np.array([0.06, -0.09, 0])
+        rf_ee_offset = np.array([0.06, -0.1, 0])
         rf_ee_triangle_positions = np.array([
             ################################################################################################
             # TODO: Implement the trotting gait
             ################################################################################################
             touch_down_position,
+            stand_position_1,
+            stand_position_2,
+            stand_position_3,
+            liftoff_position,
+            mid_swing_position
         ]) + rf_ee_offset
         
-        lf_ee_offset = np.array([0.06, 0.09, 0])
+        lf_ee_offset = np.array([0.06, 0.1, 0])
         lf_ee_triangle_positions = np.array([
-            ################################################################################################
-            # TODO: Implement the trotting gait
-            ################################################################################################
+            stand_position_3,
+            liftoff_position,
+            mid_swing_position,
             touch_down_position,
+            stand_position_1,
+            stand_position_2
         ]) + lf_ee_offset
         
-        rb_ee_offset = np.array([-0.11, -0.09, 0])
+        rb_ee_offset = np.array([-0.11, -0.1, 0])
         rb_ee_triangle_positions = np.array([
-            ################################################################################################
-            # TODO: Implement the trotting gait
-            ################################################################################################
+            stand_position_3,
+            liftoff_position,
+            mid_swing_position,
             touch_down_position,
+            stand_position_1,
+            stand_position_2
         ]) + rb_ee_offset
         
-        lb_ee_offset = np.array([-0.11, 0.09, 0])
+        lb_ee_offset = np.array([-0.11, 0.1, 0])
         lb_ee_triangle_positions = np.array([
-            ################################################################################################
-            # TODO: Implement the trotting gait
-            ################################################################################################
             touch_down_position,
+            stand_position_1,
+            stand_position_2,
+            stand_position_3,
+            liftoff_position,
+            mid_swing_position
+
         ]) + lb_ee_offset
 
 
@@ -170,20 +182,36 @@ class InverseKinematics(Node):
         ################################################################################################
         # TODO: [already done] paste lab 3 inverse kinematics here
         ################################################################################################
-        return 0
+        scalar_difference = np.linalg.norm(self.leg_forward_kinematics(theta) - desired_position)
+        return scalar_difference
 
     def inverse_kinematics_single_leg(self, target_ee, leg_index, initial_guess=[0, 0, 0]):
         self.leg_forward_kinematics = self.fk_functions[leg_index]
         ################################################################################################
         # TODO: implement interpolation for all 4 legs here
         ################################################################################################
-        return 0
+        
+        res = scipy.optimize.minimize(self.get_error_leg, initial_guess, args=(target_ee) )
+        return res.x
+
 
     def interpolate_triangle(self, t, leg_index):
-        ################################################################################################
-        # TODO: implement interpolation for all 4 legs here
-        ################################################################################################        
-        return 0
+        current = (t * 6)
+        prev_val = int(np.floor(current))
+        next_val = int(np.ceil(current))
+        if next_val == 6:
+            next_val = 0
+            
+
+        diff = current - prev_val
+
+        # print(type(leg_index), type(next_val), type(prev_val))s
+
+        lowest_to_next = self.ee_triangle_positions[leg_index][next_val] - self.ee_triangle_positions[leg_index][prev_val]
+        
+        interp_position = self.ee_triangle_positions[leg_index][prev_val] + lowest_to_next * diff
+
+        return interp_position
 
     def cache_target_joint_positions(self):
         # Calculate and store the target joint positions for a cycle and all 4 legs
